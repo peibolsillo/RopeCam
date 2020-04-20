@@ -3,136 +3,139 @@
 * Dispositivo de tirolina para camaras
 */
 
-int buttonPushCounter = 0;   // counter for the number of button presses
-int buttonState = 0;         // current state of the button
-int lastButtonState = 0;     // previous state of the button
+const int joystick = A0;        //Eje X del Joystick        
+const int pinModo = 2;			//Pulsador del Joystick
+const int ledPin = 13;
 
-const int buttonPin = 2;
+const int shockSensor = 7;      //SafeStop en caso de choque, para motor
 
-// the setup function runs once when you press reset or power the board
-void setup() {
-  // initialize digital pin LED_BUILTIN as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(buttonPin, INPUT);    // Usar una resistencia de 330 OHMS
+int contadorPulsacion = 0;
+int estadoActual = 0;
+int estadoAnterior = 0;
 
-  Serial.begin(9600);
-  Serial.println("Starting...");
-  
-  digitalWrite(LED_BUILTIN, LOW);
-  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(100);                       // wait for a second
-  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(100);                       // wait for a 1/4 of a second
-  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(100);                       // wait for a 1/4 of a second
-  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(100);                       // wait for a 1/4 of a second
-  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(100);                       // wait for a 1/4 of a second
-  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(100);                       // wait for a of a second and STOP
-  
-}
+int  value = 0;                 //variable para control del estado del Joystick
 
-// the loop function runs over and over again forever
-void loop() {
-/*
- * Si pulsa una vez pone Modo Normal, si Pulsa otra vez, pone el Modo Sport, y si pulsa otra vez
- * pone el Modo TimeLapse y por ultimo y vuelve a pulsar vuelve al modo Normal
- * 
- *  Normal Mode     = 0
- *  Sport Mode      = 1
- *  Timelapse Mode  = 2
- *  
- */
-
-// lee el estado del pulsador buttonPin:
-  buttonState = digitalRead(buttonPin);
-
- // compara el buttonState con el estado previo en el que estaba
-  if (buttonState != lastButtonState) {
-    // Si el estado a cambiado, incrementa el contador
-    if (buttonState == HIGH) {
-      // Si el estado actual es HIGH entonces el boton pará de apagado a encendido:
-      buttonPushCounter++;
-      Serial.println("Encendido");
-      Serial.print("Numero de pulsaciones: ");
-      Serial.println(buttonPushCounter);
-    } else {
-      // Si el estado se encuentra en LOW en boton parará de encendido a apagado:
-      Serial.println("off");
-    }
-    // Delay para prevenir el bouncing del pushbutton
-    delay(50);
-  }
-  // guarda el estado actual como el ultimo estado, para la proxima vez en bucle
-  lastButtonState = buttonState;
+boolean AlarmaChoque;           // Definimos el nombre de la variable donde vamos a grabar las lecturas
 
 
-  /* 
-   *  En estado:
-   *  0 = esta en Normal Mode,  si pulsamos otra vez, se pone el contador en
-   *  1 = cambia a Sportmode Mode y si pulsamos otra vez el contador para a
-   *  2 = cambia a timelapse Mode y por ultimo si volvemos a pulsar, el contador pasaria a
-   *  3 = que devolveria el contador a 0 y volveria a empezar.
-   */
-   
-  // En estado: 
-  
-  if (buttonPushCounter == 0) {
-    normalMode();
-    Serial.println("Normal Mode");
-  }
+#define dirA  9                 //Pin del Controlador L293D direccion A 
+#define dirB  10                //Pin del Controlador L293D direccion A  
 
-  else if ((buttonPushCounter == 1)) {
-    sportMode();
-    Serial.println("Sport Mode");
+void setup(){
     
+    pinMode(pinModo, INPUT_PULLUP);
+    pinMode(ledPin, OUTPUT);
+    
+    pinMode(dirA, OUTPUT);
+    pinMode(dirB, OUTPUT); 
+       
+    
+    Serial.begin(9600);
+    Serial.println("Arrancando programa");
+    
+}
+
+void loop(){
+    
+    estadoActual = digitalRead(pinModo);
+    
+    if (estadoActual != estadoAnterior){
+        if(estadoAhora == HIGH){
+            contadorPulsacion++;
+        }
+        else{
+            Serial.println("No se ha detectado Pulsacion");
+        }
+        
+    if (contadorPulsacion == 0){
+        normalMode();    
+    }
+    
+    else if (contadorPulsacion==1){
+        sportMode();
+    }
+    else if (contadorPulsacion==2){
+        timelapseMode();
+    }
+    else if (contaorPulsacion==3){
+        contadorPusacion=0;
+    }
+    else{Serial.println("Modo: ");
+    }
+    
+    estadoAnterior = estadoActual;
+    
+    
+}
+
+void normalMode(){
+    
+        digitalWrite(ledPin, HIGH);
+        delay(1000);
+        digitalWrite(ledPin, LOW);
+        delay(1000);
+        
+        Serial.println("Normal Mode");
+}
+
+/* 
+
+Codigo de control del Joystick en modo Sport / libre
+
+*/
+
+void sportMode(){
+    
+  value = analogRead(joystick);   
+  value >>= 1;                    //Sinceramente esta declaracion no se porque la hace :( !!!!
+  
+  if(value > 255){
+    digitalWrite(dirB, 0);
+    analogWrite(dirA, (value - 256));
+    Serial.print("Se mueve hacia finCa_2: ");
+    Serial.print( (value - 256) );
+    Serial.print("\n");
+    }
+  else if(value < 255){
+    digitalWrite(dirA, 0);
+    analogWrite(dirB,(255 - value));
+    Serial.print("Se mueve hacia atrás: ");
+    Serial.print( (255 - value) );
+    Serial.print("\n");
+    }
+  else{
+    digitalWrite(dirA, 0);
+    digitalWrite(dirB, 0);
+    Serial.print("- Stop -");
+    }
+
+        digitalWrite(ledPin, HIGH);
+        delay(250);
+        digitalWrite(ledPin, LOW);
+        delay(250);
+        Serial.println("Sport Mode");
+}
+
+void timeLapseMode(){
+    
+        digitalWrite(ledPin, HIGH);
+        Serial.println("Timelapse Mode");
+}
+
+
+/* 
+
+Codigo de control del Sensor de Vibración
+
+*/
+
+void sensorVibracion(){
+  
+  AlarmaChoque = digitalRead (shockSensor) ; // Leemos el estado del pin de detección f 3 val
+  if (AlarmaChoque == HIGH)                 // Cuando el sensor detecta una vibración entonces....
+  {
+    digitalWrite(dirA, 0);                  // desconectamos direccion A L
+    digitalWrite(dirB, 0);                  // desconectamos direccion A L
   }
-
-  else if ((buttonPushCounter == 2)) {
-    timelapseMode();
-    Serial.println("Timelapse Mode");
-  }
-
-  else {buttonPushCounter = 0;} 
-  
-  
 }
 
-/*
- * AQUI DECLARO LAS DIFERENTES FUNCIONES DEL PROGRAMA PARA LUEGO IR EJECUTANDO SEGÚN CONVENGA
- */
-
-void normalMode() {
-/*
- * LED blinking Slowly for a Normal Mode
- */
-
-  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);                       // wait for a second
-  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);                       // wait for a second
-  
-}
-
-void sportMode() {
-/*
- * LED blinking Rapidly for a Sport Mode
- */
-
-  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(150);                       // wait for a second
-  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(150);                       // wait for a second
-  
-}
-
-void timelapseMode() {
-/*
- * LED Stay HOLD for a Time Lapse Mode
- */
-
-  digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-  
-}
