@@ -16,7 +16,7 @@ const int pinModo = 2;
 cont int ledPin = 13;
 
 int contadorPulsacion = 0;
-int estadoAhora = 0;
+int estadoAnterior = 0;
 int estadoAnterior = 0;
  
 unsigned long duration;
