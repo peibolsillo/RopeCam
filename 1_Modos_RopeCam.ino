@@ -39,14 +39,37 @@ void loop(){
     
     estadoActual = digitalRead(pinModo);
     
+    /*TODO: Antonio -
+    Se puede hacer esto?
+    if(estadoActual != estadoAnterior)
+    {
+      return; o continue;
+    }
+    Es una buena práctica simplificar sentencias "if", de esta forma evitas el uso de if anidados 
+    que a la larga complican el código.
+    */
+   
     if (estadoActual != estadoAnterior){
+      /*TODO: Antonio -
+      Existe un concepto que se llama operador ternario, sirve para simplicifar sentecias "if" en una sola linea.
+      El siguiente if-else podría quedar tal que así:
+
+      estadoAhora == HIGH ? contadorPulsacion++ : Serial.println("No se ha detectado Pulsacion");
+
+      */
         if(estadoAhora == HIGH){
             contadorPulsacion++;
         }
         else{
             Serial.println("No se ha detectado Pulsacion");
         }
-        
+
+      
+    /*TODO: Antonio -
+    Intenta utilizar switch case en vez de if-else siempre que se pueda.
+    Este es un caso muy claro para utilizar siwth case ya que solo evaluas una variable y siempre la comparas con una constante.
+
+    */
     if (contadorPulsacion == 0){
         normalMode();    
     }
@@ -60,6 +83,12 @@ void loop(){
     else if (contaorPulsacion==3){
         contadorPusacion=0;
     }
+
+    
+/*TODO: Antonio -
+Supongo que el else quieres logar el modo que no as controlado.
+Probablemente deberías de concatenar "Modo: " + contadorPulsacion o algo así 
+*/
     else{Serial.println("Modo: ");
     }
     
