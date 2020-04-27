@@ -19,7 +19,7 @@ boolean AlarmaChoque;           // Definimos el nombre de la variable donde vamo
 
 
 #define dirA  9                 //Pin del Controlador L293D direccion A 
-#define dirB  10                //Pin del Controlador L293D direccion A  
+#define dirB  10                //Pin del Controlador L293D direccion B  
 
 void setup(){
     

@@ -17,7 +17,6 @@ bool estado_anterior = true ;   //Variable control cambio de estado de los pulsa
 
 int  value = 0;                 //variable para control del estado del Joystick
 
-boolean AlarmaChoque;           // Definimos el nombre de la variable donde vamos a grabar las lecturas
 
 
 void setup() {
@@ -87,15 +86,17 @@ Codigo de control del Sensor de Vibración
 
 */
 
-void sensorVibracion(){
-  
-  AlarmaChoque= digitalRead (shockSensor) ; // Leemos el estado del pin de detección f 3 val
-  if (AlarmaChoque == HIGH)                 // Cuando el sensor detecta una vibración entonces....
-  {
+boolean alarmaChoque = digitalRead(shockSensor);           // Definimos el nombre de la variable donde vamos a grabar las lecturas
+
+
+while (alarmaChoque){
+                						    // Cuando el sensor detecta una vibración entonces.	
     digitalWrite(dirA, 0);                  // desconectamos direccion A L
     digitalWrite(dirB, 0);                  // desconectamos direccion A L
+    
+    alarmaChoque = digitalRead (shockSensor);
+    
   }
-}
 
 void loop() {
   // put your main code here, to run repeatedly:
